@@ -121,6 +121,10 @@ while true; do
 
         # Atualiza a última rede conectada
         ultima_rede="$rede_atual"
+
+    else
+        # Mostra a rede atual caso não haja mudança
+        echo "Você já está conectado à rede: $rede_atual"
     fi
 
     # Espera um tempo antes de checar novamente
