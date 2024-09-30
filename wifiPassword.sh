@@ -1,16 +1,18 @@
 #!/bin/bash
 
 # Nome do arquivo para salvar redes Wi-Fi
-arquivo_redes="$HOME/redes_wifi.txt"
+ARQUIVO_REDES="$HOME/redes_wifi.txt"
 
 # Nome do próprio script (ajustar se necessário)
-script_rede="$0"
+SCRIPT_REDE="$0"
 
 # Variável para armazenar a última rede
-ultima_rede=""
+ULTIMA_REDE=""
 
 # Função para exibir ajuda
 mostrar_ajuda() {
+    echo "Equipe: Caio Cavalcante Araújo"
+    echo ""
     echo "Uso: $0 [opções]"
     echo ""
     echo "Este script monitora a conexão a novas redes Wi-Fi, exibe o nome da rede e, se solicitado,"
@@ -23,33 +25,33 @@ mostrar_ajuda() {
     echo "  - Após tornar o script executável com ''chmod +x'' e executá-lo com ./script, ele vai:  "
     echo "  - Detectar mudanças na rede Wi-Fi e, quando conectado a uma nova rede, pergunta se"
     echo "    você deseja exibir a senha dessa rede."
-    echo "  - As informações da rede e senha (se exibida) são salvas no arquivo: $arquivo_redes"
+    echo "  - As informações da rede e senha (se exibida) são salvas no arquivo: $ARQUIVO_REDES"
     exit 0
 }
 
 # Função para gravar no arquivo (sobrescrevendo)
 gravar_no_arquivo() {
-    echo "-----------------------------------" > "$arquivo_redes"
-    echo "Rede: $1" >> "$arquivo_redes"
+    echo "-----------------------------------" > "$ARQUIVO_REDES"
+    echo "Rede: $1" >> "$ARQUIVO_REDES"
     if [ -n "$2" ]; then
-        echo "Senha: $2" >> "$arquivo_redes"
+        echo "Senha: $2" >> "$ARQUIVO_REDES"
     else
-        echo "Senha: (não exibida ou rede aberta)" >> "$arquivo_redes"
+        echo "Senha: (não exibida ou rede aberta)" >> "$ARQUIVO_REDES"
     fi
-    echo "-----------------------------------" >> "$arquivo_redes"
-    echo "" >> "$arquivo_redes"
+    echo "-----------------------------------" >> "$ARQUIVO_REDES"
+    echo "" >> "$ARQUIVO_REDES"
 }
 
 # Função para adicionar permissões sudoers sem senha para o script
 adicionar_sudoers() {
     # Converte o caminho do script para um caminho absoluto
-    script_rede_abs=$(realpath "$script_rede")
-    echo "Caminho absoluto do script: $script_rede_abs"
-    sudoers_entry="$USER ALL=(ALL) NOPASSWD: $script_rede_abs"
+    SCRIPT_REDE_ABS=$(realpath "$SCRIPT_REDE")
+    echo "Caminho absoluto do script: $SCRIPT_REDE_ABS"
+    sudoers_entry="$USER ALL=(ALL) NOPASSWD: $SCRIPT_REDE_ABS"
 
     # Verifica se a entrada já existe no arquivo sudoers
     if ! sudo grep -Fxq "$sudoers_entry" /etc/sudoers; then
-        echo "Adicionando permissões sudo para o script $script_rede..."
+        echo "Adicionando permissões sudo para o script $SCRIPT_REDE..."
         echo "$sudoers_entry" | sudo tee -a /etc/sudoers > /dev/null
         echo "Permissões sudo adicionadas com sucesso."
     else
@@ -77,54 +79,54 @@ fi
 # Inicia o loop de verificação contínua
 while true; do
     # Obtém a rede atual (SSID)
-    rede_atual=$(nmcli -t -f active,ssid dev wifi | grep '^yes' | cut -d':' -f2)
+    REDE_ATUAL=$(nmcli -t -f active,ssid dev wifi | grep '^yes' | cut -d':' -f2)
 
     # Verifica se a rede mudou
-    if [ "$rede_atual" != "$ultima_rede" ]; then
-        echo "Você se conectou a uma nova rede: $rede_atual"
+    if [ "$REDE_ATUAL" != "$ULTIMA_REDE" ]; then
+        echo "Você se conectou a uma nova rede: $REDE_ATUAL"
 
         # Faz o escape do nome da rede para evitar problemas com caracteres especiais
-        rede_escapada=$(printf '%q' "$rede_atual")
+        REDE_ESCAPADA=$(printf '%q' "$REDE_ATUAL")
 
         # Verifica se o arquivo de configuração da rede existe (tratando espaços e caracteres especiais no nome)
-        config_path=$(find /etc/NetworkManager/system-connections/ -name "$rede_escapada*" | head -n 1)
+        config_path=$(find /etc/NetworkManager/system-connections/ -name "$REDE_ESCAPADA*" | head -n 1)
 
-        if [ -n "$config_path" ]; then
+        if [ -n "$CONFIG_PATH" ]; then
             # Pergunta ao usuário se deseja exibir a senha
             while true; do
-                read -p "Deseja ver a senha da rede $rede_atual? (s/n): " exibir_senha
-                if [[ "$exibir_senha" =~ ^[sn]$ ]]; then
+                read -p "Deseja ver a senha da rede $REDE_ATUAL? (s/n): " EXIBIR_SENHA
+                if [[ "$EXIBIR_SENHA" =~ ^[sn]$ ]]; then
                     break
                 else
                     echo "Por favor, insira 's' para sim ou 'n' para não."
                 fi
             done
 
-            if [ "$exibir_senha" == "s" ]; then
+            if [ "$EXIBIR_SENHA" == "s" ]; then
                 # Verifica se a rede tem uma senha configurada
                 senha=$(sudo grep psk= "$config_path" | cut -d'=' -f2)
 
-                if [ -n "$senha" ]; then
-                    echo "A senha da rede $rede_atual é: $senha"
-                    gravar_no_arquivo "$rede_atual" "$senha"  # Grava rede e senha no arquivo (sobrescrevendo)
+                if [ -n "$SENHA" ]; then
+                    echo "A senha da rede $REDE_ATUAL é: $SENHA"
+                    gravar_no_arquivo "$REDE_ATUAL" "$SENHA"  # Grava rede e senha no arquivo (sobrescrevendo)
                 else
                     echo "Esta rede não possui senha (rede aberta ou senha não encontrada)."
-                    gravar_no_arquivo "$rede_atual"  # Grava rede sem senha no arquivo (sobrescrevendo)
+                    gravar_no_arquivo "$REDE_ATUAL"  # Grava rede sem senha no arquivo (sobrescrevendo)
                 fi
             else
                 echo "Senha não exibida conforme solicitado."
-                gravar_no_arquivo "$rede_atual"  # Grava rede sem senha no arquivo (sobrescrevendo)
+                gravar_no_arquivo "$REDE_ATUAL"  # Grava rede sem senha no arquivo (sobrescrevendo)
             fi
         else
-            echo "Arquivo de configuração da rede $rede_atual não encontrado."
+            echo "Arquivo de configuração da rede $REDE_ATUAL não encontrado."
         fi
 
         # Atualiza a última rede conectada
-        ultima_rede="$rede_atual"
+        ULTIMA_REDE="$REDE_ATUAL"
 
     else
         # Mostra a rede atual caso não haja mudança
-        echo "Você já está conectado à rede: $rede_atual"
+        echo "Você já está conectado à rede: $REDE_ATUAL"
     fi
 
     # Espera um tempo antes de checar novamente
