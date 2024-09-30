@@ -47,12 +47,12 @@ adicionar_sudoers() {
     # Converte o caminho do script para um caminho absoluto
     SCRIPT_REDE_ABS=$(realpath "$SCRIPT_REDE")
     echo "Caminho absoluto do script: $SCRIPT_REDE_ABS"
-    sudoers_entry="$USER ALL=(ALL) NOPASSWD: $SCRIPT_REDE_ABS"
+    SUDOERS_ENTRY="$USER ALL=(ALL) NOPASSWD: $SCRIPT_REDE_ABS"
 
     # Verifica se a entrada já existe no arquivo sudoers
-    if ! sudo grep -Fxq "$sudoers_entry" /etc/sudoers; then
+    if ! sudo grep -Fxq "$SUDOERS_ENTRY" /etc/sudoers; then
         echo "Adicionando permissões sudo para o script $SCRIPT_REDE..."
-        echo "$sudoers_entry" | sudo tee -a /etc/sudoers > /dev/null
+        echo "$SUDOERS_ENTRY" | sudo tee -a /etc/sudoers > /dev/null
         echo "Permissões sudo adicionadas com sucesso."
     else
         echo "Permissões sudo já estão configuradas."
@@ -89,7 +89,7 @@ while true; do
         REDE_ESCAPADA=$(printf '%q' "$REDE_ATUAL")
 
         # Verifica se o arquivo de configuração da rede existe (tratando espaços e caracteres especiais no nome)
-        config_path=$(find /etc/NetworkManager/system-connections/ -name "$REDE_ESCAPADA*" | head -n 1)
+        CONFIG_PATH=$(find /etc/NetworkManager/system-connections/ -name "$REDE_ESCAPADA*" | head -n 1)
 
         if [ -n "$CONFIG_PATH" ]; then
             # Pergunta ao usuário se deseja exibir a senha
@@ -104,7 +104,7 @@ while true; do
 
             if [ "$EXIBIR_SENHA" == "s" ]; then
                 # Verifica se a rede tem uma senha configurada
-                senha=$(sudo grep psk= "$config_path" | cut -d'=' -f2)
+                SENHA=$(sudo grep psk= "$CONFIG_PATH" | cut -d'=' -f2)
 
                 if [ -n "$SENHA" ]; then
                     echo "A senha da rede $REDE_ATUAL é: $SENHA"
