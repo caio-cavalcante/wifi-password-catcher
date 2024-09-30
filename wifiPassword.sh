@@ -26,7 +26,7 @@ mostrar_ajuda() {
     echo "  - Detectar mudanças na rede Wi-Fi e, quando conectado a uma nova rede, pergunta se"
     echo "    você deseja exibir a senha dessa rede."
     echo "  - As informações da rede e senha (se exibida) são salvas no arquivo: $ARQUIVO_REDES."
-    echo "  - Para sair do terminal após executar o arquivo, pressione Ctrl + C ou Esc."
+    echo "  - Para sair do terminal após executar o arquivo, pressione Ctrl + C."
     exit 0
 }
 
@@ -77,24 +77,11 @@ if [[ "$1" == "-h" || "$1" == "--help" ]]; then
     mostrar_ajuda
 fi
 
-# Função para verificar tecla ESC
-verificar_esc() {
-    read -rsn1 INPUT
-    if [[ "$INPUT" == $'\e' ]]; then
-        echo "ESC pressionado. Encerrando o script."
-        exit 0
-    fi
-}
-
 # Inicia o loop de verificação contínua
 while true; do
-    # Verifica se a tecla ESC foi pressionada
-    verificar_esc &
 
     # Obtém a rede atual (SSID)
     REDE_ATUAL=$(nmcli -t -f active,ssid dev wifi | grep '^yes' | cut -d':' -f2)
-
-    echo "Você está conectado à rede: $REDE_ATUAL"
 
     # Verifica se a rede mudou
     if [ "$REDE_ATUAL" != "$ULTIMA_REDE" ]; then
@@ -142,7 +129,7 @@ while true; do
 
     else
         # Mostra a rede atual caso não haja mudança
-        echo "Você ainda está conectado na mesma rede."
+        echo "Você está conectado à rede: $REDE_ATUAL"
     fi
 
     # Espera um tempo antes de checar novamente
