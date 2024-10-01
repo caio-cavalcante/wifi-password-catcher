@@ -129,7 +129,7 @@ while true; do
 
     else
         # Mostra a rede atual caso não haja mudança
-        echo "Você está conectado à rede: $REDE_ATUAL"
+        echo "Você está conectado à uma rede."
     fi
 
     # Espera um tempo antes de checar novamente
